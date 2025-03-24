@@ -1,18 +1,14 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, send_file
-from flask import session, redirect
-import os
+from flask import Flask, render_template, request, jsonify, redirect, url_for, send_file, session
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 from reportlab.pdfgen import canvas
 from io import BytesIO
-import os
+import random
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'your_secret_key'
 db = SQLAlchemy(app)
-# Add at the top of app.py
-# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -24,35 +20,29 @@ class Transaction(db.Model):
 with app.app_context():
     db.create_all()
 
-# Add these imports at the top
-from flask import session, redirect
-import os
-
-# Add this route for logout
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('admin'))
 
-# Modify the download_pdf route
 @app.route('/download_pdf')
 def download_pdf():
     download_type = request.args.get('type', 'all')
-    
+
     if download_type == 'latest':
         transactions = [Transaction.query.order_by(Transaction.id.desc()).first()]
     else:
         transactions = Transaction.query.all()
-    
+
     buffer = BytesIO()
     p = canvas.Canvas(buffer)
-    
+
     # Add header
     p.setFont("Helvetica-Bold", 16)
     p.drawString(50, 800, "NarcoTech Transaction Report")
     p.setFont("Helvetica", 12)
     p.drawString(50, 780, f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    
+
     # Add transactions
     y = 740
     for t in transactions:
@@ -61,7 +51,7 @@ def download_pdf():
         p.drawString(50, y-40, f"Amount: {t.amount} BTC")
         p.drawString(50, y-60, f"Wallet: {t.wallet}")
         y -= 100
-    
+
     p.save()
     buffer.seek(0)
     return send_file(
@@ -95,14 +85,23 @@ def admin():
 @app.route('/process_transaction', methods=['POST'])
 def process_transaction():
     data = request.json
+
+    # Generate a random past date (between 1 and 365 days ago)
+    random_days_ago = random.randint(1, 365)  # Random number of days in the past
+    random_seconds = random.randint(0, 86400)  # Random seconds within the day
+    transaction_date = datetime.utcnow() - timedelta(days=random_days_ago, seconds=random_seconds)
+
     new_transaction = Transaction(
         product=data['product'],
         amount=float(data['amount']),
-        wallet=data['wallet']
+        wallet=data['wallet'],
+        date=transaction_date
     )
+
     db.session.add(new_transaction)
     db.session.commit()
-    return jsonify({"status": "success"})
+
+    return jsonify({"status": "success", "transaction_date": transaction_date.strftime("%Y-%m-%d %H:%M:%S")})
 
 if __name__ == '__main__':
     app.run(debug=True)
