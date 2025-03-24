@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Special Orders - NarcoTech</title>
     <style>
@@ -10,20 +11,23 @@
             margin: 0;
             padding: 20px;
         }
+
         .checkout-container {
             max-width: 800px;
             margin: 50px auto;
             padding: 30px;
             background: #1e1e1e;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
+
         .product-list {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
+
         .product-item {
             background: #2a2a2a;
             padding: 15px;
@@ -31,17 +35,22 @@
             cursor: pointer;
             transition: transform 0.2s;
         }
+
         .product-item:hover {
             transform: translateY(-5px);
             background: #333;
         }
+
         .product-item.selected {
             border: 2px solid #4CAF50;
         }
+
         .form-group {
             margin-bottom: 20px;
         }
-        input, select {
+
+        input,
+        select {
             width: 100%;
             padding: 12px;
             margin: 8px 0;
@@ -50,6 +59,7 @@
             color: white;
             border-radius: 6px;
         }
+
         .submit-btn {
             background: #4CAF50;
             color: white;
@@ -61,14 +71,17 @@
             width: 100%;
             transition: background 0.3s;
         }
+
         .submit-btn:hover {
             background: #45a049;
         }
+
         .warning {
             color: #ff6b6b;
             font-size: 0.9em;
             margin-top: 20px;
         }
+
         .security-notice {
             background: #2c3e50;
             padding: 10px;
@@ -78,10 +91,11 @@
         }
     </style>
 </head>
+
 <body>
     <div class="checkout-container">
         <h2>Secure Order Processing</h2>
-        
+
         <div class="product-list">
             <div class="product-item" onclick="selectProduct('Crystal Enhancement', 5)">
                 <h3>Crystal Enhancement</h3>
@@ -118,12 +132,12 @@
         <button class="submit-btn" onclick="processOrder()">Complete Secure Transaction</button>
 
         <p class="warning">
-            ⚠️ WARNING: All transactions are final and non-refundable. 
+            ⚠️ WARNING: All transactions are final and non-refundable.
             Ensure your wallet address is correct before proceeding.
         </p>
 
         <div class="security-notice">
-            🔒 This connection is end-to-end encrypted. 
+            🔒 This connection is end-to-end encrypted.
             For additional security, clear your browser history after completing the transaction.
         </div>
     </div>
@@ -136,12 +150,12 @@
             selectedProduct = product;
             selectedAmount = amount;
             document.getElementById('selected-product').value = `${product} - ${amount} BTC`;
-            
+
             // Remove selection from all products
             document.querySelectorAll('.product-item').forEach(item => {
                 item.classList.remove('selected');
             });
-            
+
             // Add selection to clicked product
             event.currentTarget.classList.add('selected');
         }
@@ -155,8 +169,8 @@
                 return;
             }
 
-            if (!wallet.match(/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/)) {
-                alert('Please enter a valid Bitcoin wallet address');
+            if (wallet.length < 25) {
+                alert('Please enter a valid Bitcoin wallet address (at least 25 characters)');
                 return;
             }
 
@@ -171,17 +185,18 @@
                     wallet: wallet
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    alert('Transaction recorded successfully. Clear your browser history for security.');
-                    window.location.href = '/';
-                }
-            })
-            .catch(error => {
-                alert('Transaction failed. Please try again later.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Transaction recorded successfully. Clear your browser history for security.');
+                        window.location.href = '/';
+                    }
+                })
+                .catch(error => {
+                    alert('Transaction failed. Please try again later.');
+                });
         }
     </script>
 </body>
+
 </html>
